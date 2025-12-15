@@ -1,0 +1,32 @@
+﻿# Data files (user must provide)
+data/PEMS08.npz
+models/traffic_lstm.pth
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+
+# Results
+results/*.json
+results/*.csv
+
+# Azure
+*.tar.gz
+.azure/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

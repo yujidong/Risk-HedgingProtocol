@@ -1,0 +1,165 @@
+# ============================================================================
+# Git Ignore Configuration for Risk-Hedging Protocol
+# Last Updated: December 15, 2025
+# ============================================================================
+
+# ====================
+# Node.js / JavaScript
+# ====================
+/node_modules
+node_modules/
+/dist
+/bundle
+package-lock.json
+
+# ====================
+# Hardhat / Blockchain
+# ====================
+# Build artifacts (generated code)
+/artifacts
+/cache
+/types
+/coverage
+
+# Deployment records (keep for testnet, may want to track for mainnet)
+ignition/deployments/chain-*/
+
+# ====================
+# Python / ML
+# ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# ====================
+# ML Models & Data
+# ====================
+# Large model files (users should download separately)
+*.pth
+*.pt
+*.h5
+*.pb
+*.onnx
+
+# Large dataset files (document download location in README)
+*.npz
+*.npy
+input/pems-dataset/data/*.txt
+input/pems-dataset/data/*.npz
+
+# TEE data and models
+tee/data/PEMS08.npz
+tee/models/traffic_lstm.pth
+
+# ====================
+# Environment & Secrets
+# ====================
+# CRITICAL: Never commit these!
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ====================
+# Output & Results
+# ====================
+# Experimental results (can be regenerated)
+output/benchmark/*.json
+output/data/*.json
+output/figures/*.png
+tee/results/*.json
+tee/results/*.csv
+
+# Keep sample results for documentation (if any)
+!output/benchmark/README.md
+!output/data/README.md
+!tee/results/README.md
+
+# ====================
+# IDE & Editors
+# ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ====================
+# Operating System
+# ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# ====================
+# Logs & Temporary Files
+# ====================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# ====================
+# Cloud & Deployment
+# ====================
+# Azure artifacts
+*.tar.gz
+.azure/
+
+# Docker
+docker-compose.override.yml
+
+# ====================
+# Testing & Coverage
+# ====================
+coverage/
+.nyc_output/
+*.lcov
+
+# ====================
+# Temporary Directories
+# ====================
+# Temporary benchmark packages
+tee-benchmark-package-*/

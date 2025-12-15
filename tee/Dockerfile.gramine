@@ -1,0 +1,57 @@
+# TEE Benchmark - Gramine SGX Docker Image
+
+FROM gramineproject/gramine:latest
+
+# Install Python and dependencies
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    wget \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first
+COPY requirements.txt .
+
+# Install CPU-only PyTorch (compatible with SGX enclave)
+RUN pip3 install --no-cache-dir --break-system-packages \
+    numpy pandas scikit-learn psutil web3 eth-account && \
+    pip3 install --no-cache-dir --break-system-packages \
+    torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+
+# Copy application files
+COPY tee_benchmark.py .
+COPY tee_benchmark.manifest.template .
+
+# Create directories
+RUN mkdir -p /app/data /app/models /app/results
+
+# CRITICAL: Copy data and model files into image
+# Do NOT rely on volume mounts - data must be in image for Azure deployment
+COPY data/PEMS08.npz /app/data/
+COPY models/traffic_lstm.pth /app/models/
+
+# Verify files are present to avoid fallback to dummy data
+RUN test -f /app/data/PEMS08.npz || (echo "ERROR: PEMS08.npz not found!" && exit 1)
+RUN test -f /app/models/traffic_lstm.pth || (echo "ERROR: traffic_lstm.pth not found!" && exit 1)
+
+# Generate Gramine manifest
+RUN gramine-manifest \
+    -Dlog_level=warning \
+    -Darch_libdir=/lib/x86_64-linux-gnu \
+    tee_benchmark.manifest.template tee_benchmark.manifest
+
+# Generate SGX signing key
+RUN gramine-sgx-gen-private-key
+
+# Generate SGX signature
+RUN gramine-sgx-sign \
+    --manifest tee_benchmark.manifest \
+    --output tee_benchmark.manifest.sgx
+
+# Use gramine-sgx for real SGX hardware (not gramine-direct simulation)
+ENTRYPOINT ["gramine-sgx", "tee_benchmark"]
+CMD []

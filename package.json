@@ -1,0 +1,36 @@
+{
+  "name": "data-equity-protocol",
+  "version": "1.0.0",
+  "description": "Risk-Hedging Equity Protocol for IoT Data Trading",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost"
+  },
+  "keywords": [
+    "solidity",
+    "smart-contract",
+    "blockchain",
+    "iot",
+    "data-trading"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^3.0.6",
+    "@nomicfoundation/hardhat-ignition-viem": "^3.0.6",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.1",
+    "@nomicfoundation/hardhat-viem": "^3.0.1",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@types/node": "^22.19.2",
+    "chai": "^6.2.1",
+    "dotenv": "^17.2.3",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.1.0",
+    "typescript": "~5.8.0",
+    "viem": "^2.41.2"
+  }
+}

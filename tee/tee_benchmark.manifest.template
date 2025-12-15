@@ -1,0 +1,65 @@
+# Gramine Manifest Template for TEE Benchmark
+
+loader.log_level = "error"
+
+# Set default argv - will be overridden by docker run args
+loader.argv = [
+    "python3.12",
+    "tee_benchmark.py",
+    "--iterations", "10",
+    "--data-size", "100",
+    "--batch-size", "32",
+    "--output", "/app/results/tee_benchmark_results.json"
+]
+
+loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}:/usr/{{ arch_libdir }}"
+loader.env.PATH = "/usr/bin:/bin"
+loader.env.HOME = "/app"
+loader.env.PYTHONPATH = "/app"
+loader.env.PYTHONDONTWRITEBYTECODE = "1"
+
+libos.entrypoint = "/usr/bin/python3.12"
+fs.start_dir = "/app"
+
+fs.mounts = [
+    { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+    { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+    { path = "/usr/{{ arch_libdir }}", uri = "file:/usr/{{ arch_libdir }}" },
+    { path = "/usr/bin", uri = "file:/usr/bin" },
+    { path = "/usr/lib/python3.12", uri = "file:/usr/lib/python3.12" },
+    { path = "/usr/lib/python3", uri = "file:/usr/lib/python3" },
+    { path = "/usr/local/lib/python3.12", uri = "file:/usr/local/lib/python3.12" },
+    { path = "/usr/share/zoneinfo", uri = "file:/usr/share/zoneinfo" },
+    { path = "/app/results", type = "chroot", uri = "file:/app/results" },
+    { path = "/app", uri = "file:/app" },
+    { path = "/tmp", type = "tmpfs" },
+]
+
+sgx.debug = true
+sgx.enclave_size = "8G"
+sgx.max_threads = 32
+
+sgx.trusted_files = [
+    "file:{{ gramine.runtimedir() }}/",
+    "file:{{ arch_libdir }}/",
+    "file:/usr/{{ arch_libdir }}/",
+    "file:/usr/bin/python3.12",
+    "file:/bin/bash",
+    "file:/bin/sh",
+    "file:/usr/lib/python3.12/",
+    "file:/usr/lib/python3/",
+    "file:/usr/local/lib/python3.12/",
+    "file:/usr/share/zoneinfo/",
+    "file:/app/tee_benchmark.py",
+]
+
+sgx.allowed_files = [
+    "file:/app/data/",
+    "file:/app/models/",
+    "file:/app/results/",
+    "file:/tmp/",
+]
+
+# Suppress unnecessary warnings
+sys.enable_extra_runtime_domain_names_conf = true
+sys.insecure__allow_eventfd = true
