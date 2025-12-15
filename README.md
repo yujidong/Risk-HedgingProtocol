@@ -387,8 +387,6 @@ All results available in `output/data/*.json` and `tee/results/*.json`
 </p>
 
 
-> **Layered Architecture**: Five-layer vertical pipeline ensuring data quality, security, and trustless settlement. Each layer builds upon the previous: **(1) Data** collection from IoT sensors, **(2) AI/ML** quality assessment with noise-robust LSTM models, **(3) TEE** secure computation in SGX enclaves, **(4) Blockchain** game-theoretic pricing and atomic payment, **(5) Multi-network** deployment across L1/L2 for cost optimization.
-
 ## 🧩 Key Components Integration
 
 ### Data Flow
@@ -459,14 +457,6 @@ Where:
 4. **Reentrancy Guard**: Protection against recursive call attacks
 5. **Access Control**: Owner-only admin functions (Ownable pattern)
 6. **Atomic Settlement**: All-or-nothing payment execution
-
-## 📚 Documentation
-
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Testnet deployment guide
-- [ACCOUNTS.md](ACCOUNTS.md) - Multi-account setup
-- [tee/README.md](tee/README.md) - TEE component guide
-- [tee/docs/ARCHITECTURE.md](tee/docs/ARCHITECTURE.md) - System architecture
-- [tee/docs/SETUP.md](tee/docs/SETUP.md) - SGX setup instructions
 
 ## 🚧 Future Enhancements
 
