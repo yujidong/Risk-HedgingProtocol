@@ -386,7 +386,6 @@ All results available in `output/data/*.json` and `tee/results/*.json`
   <img src="architecture.svg" alt="System Architecture" style="max-width:100%;height:auto;" />
 </p>
 
-> *Note: the original Mermaid diagram was replaced with the high-fidelity `architecture.svg` illustration.*
 
 > **Layered Architecture**: Five-layer vertical pipeline ensuring data quality, security, and trustless settlement. Each layer builds upon the previous: **(1) Data** collection from IoT sensors, **(2) AI/ML** quality assessment with noise-robust LSTM models, **(3) TEE** secure computation in SGX enclaves, **(4) Blockchain** game-theoretic pricing and atomic payment, **(5) Multi-network** deployment across L1/L2 for cost optimization.
 
