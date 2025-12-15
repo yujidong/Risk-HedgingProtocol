@@ -2,6 +2,8 @@
 
 A complete blockchain-based implementation of the **Trustworthy Data Equity Protocol** combining smart contracts, TEE-secured computation, and AI-powered data analysis for secure IoT data trading.
 
+> **📄 Paper**: This repository contains the official implementation for the paper *"Trustworthy Data Equity: A Retrospective Risk-Hedging Protocol for High-Entropy IoT Data Assets"* submitted to **IEEE Internet of Things Journal**.
+
 ## Overview
 
 This project implements an end-to-end decentralized data trading system with three integrated components:
