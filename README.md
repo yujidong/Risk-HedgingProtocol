@@ -382,50 +382,13 @@ See [tee/docs/ARCHITECTURE.md](tee/docs/ARCHITECTURE.md) for technical details.
 All results available in `output/data/*.json` and `tee/results/*.json`
 
 ## 🏛️ System Architecture
+<p align="center">
+  <img src="architecture.svg" alt="System Architecture" style="max-width:100%;height:auto;" />
+</p>
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Risk-Hedging Data Trading System            │
-└─────────────────────────────────────────────────────────────────┘
+> *Note: the original Mermaid diagram was replaced with the high-fidelity `architecture.svg` illustration.*
 
-┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│   IoT Devices    │      │   Data Seller    │      │   Data Buyer     │
-│  (Data Source)   │─────▶│  (Provider)      │◀────▶│  (Consumer)      │
-└──────────────────┘      └────────┬─────────┘      └────────┬─────────┘
-                                   │                          │
-                                   │                          │
-                          ┌────────▼──────────────────────────▼─────────┐
-                          │    🤖 ML Model Training Pipeline            │
-                          │    - LSTM traffic prediction                │
-                          │    - Noise robustness testing               │
-                          │    - Utility score calculation              │
-                          └────────┬────────────────────────────────────┘
-                                   │
-                                   │ Data + Metadata
-                                   │
-                          ┌────────▼────────────────────────────────────┐
-                          │    🔒 TEE (Intel SGX via Gramine)          │
-                          │    - Secure model inference                 │
-                          │    - Privacy-preserving computation         │
-                          │    - Utility score validation               │
-                          │    - ECDSA signature generation             │
-                          └────────┬────────────────────────────────────┘
-                                   │
-                                   │ Signed Utility Score
-                                   │
-                          ┌────────▼────────────────────────────────────┐
-                          │    ⛓️  Blockchain Smart Contract            │
-                          │    - Order management                       │
-                          │    - Signature verification                 │
-                          │    - Atomic payment (P = p + α*k*u)        │
-                          │    - Escrow & refund protection             │
-                          └─────────────────────────────────────────────┘
-                                   │
-                          ┌────────▼─────────┐
-                          │   💰 Settlement   │
-                          │   Seller Paid    │
-                          └──────────────────┘
-```
+> **Layered Architecture**: Five-layer vertical pipeline ensuring data quality, security, and trustless settlement. Each layer builds upon the previous: **(1) Data** collection from IoT sensors, **(2) AI/ML** quality assessment with noise-robust LSTM models, **(3) TEE** secure computation in SGX enclaves, **(4) Blockchain** game-theoretic pricing and atomic payment, **(5) Multi-network** deployment across L1/L2 for cost optimization.
 
 ## 🧩 Key Components Integration
 
@@ -519,17 +482,6 @@ Where:
 
 MIT License - See [LICENSE](LICENSE)
 
-## 🎓 Citation
-
-```bibtex
-@software{risk_hedging_protocol_2025,
-  title={Risk-Hedging Equity Protocol for IoT Data Trading},
-  author={Research Team},
-  year={2025},
-  url={https://github.com/yourusername/Risk-HedgingProtocol},
-  note={TEE-secured blockchain data trading with LSTM validation}
-}
-```
 
 ## 🔗 Useful Links
 
@@ -548,7 +500,3 @@ MIT License - See [LICENSE](LICENSE)
 - Azure SGX Docs: https://learn.microsoft.com/en-us/azure/virtual-machines/dcv3-series
 
 ---
-
-**Project Status**: ✅ Production-ready contracts | 🧪 Research-grade ML/TEE
-
-Built with ❤️ for trustworthy decentralized data trading
