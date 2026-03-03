@@ -1,0 +1,30 @@
+{
+  "network": "testnet",
+  "timestamp": "2025-12-15T09:53:16.043Z",
+  "tests": [
+    {
+      "test": "Order Creation",
+      "gasUsed": "273077",
+      "gasPrice": "2586782",
+      "totalCost": "0.000000706390668214",
+      "timeMs": "1965.39",
+      "txHash": "0xdbf440e20afa43099d140f1f32ba2dd312f3142b2386b81245a5156b5e79e752"
+    },
+    {
+      "test": "Settlement",
+      "gasUsed": "71208",
+      "gasPrice": "2748771",
+      "totalCost": "0.000000195734485368",
+      "timeMs": "2007.49",
+      "txHash": "0x397c4afc5cfc9a33bca54ca6b1838650559dd66f17066a346fd657673315b9f9"
+    },
+    {
+      "test": "Batch Operations",
+      "batchSize": 3,
+      "totalTimeMs": "46682.60",
+      "avgGasUsed": "261689",
+      "avgTimeMs": "15559.88",
+      "throughputTxPerSec": "0.0643"
+    }
+  ]
+}

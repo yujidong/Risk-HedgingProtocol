@@ -79,7 +79,12 @@ def plot_random_drop_analysis(results_file='output/data/random_drop_results.json
     color_perf = '#2E86AB'
     ax_top.set_xlabel('Random Drop Rate', fontsize=13, fontweight='bold')
     ax_top.set_ylabel('Mean R² Score', color=color_perf, fontsize=13, fontweight='bold')
-    line1 = ax_top.plot(drop_rates, mean_r2, 'o-', color=color_perf, linewidth=3, 
+
+    # Add 95% confidence interval band first (so it's behind the line)
+    ax_top.fill_between(drop_rates, ci_lower, ci_upper, alpha=0.25,
+                       color=color_perf, label='95% CI (1.96σ)')
+
+    line1 = ax_top.plot(drop_rates, mean_r2, 'o-', color=color_perf, linewidth=3,
                         markersize=10, label='Mean R²', alpha=0.8)
     ax_top.tick_params(axis='y', labelcolor=color_perf)
     ax_top.set_ylim([0.3, 0.85])
@@ -102,15 +107,19 @@ def plot_random_drop_analysis(results_file='output/data/random_drop_results.json
     ax_top2.text(0.82, 1, '1×', fontsize=9, color='gray', alpha=0.8, va='bottom')
     ax_top2.text(0.82, 5, '5×', fontsize=9, color='orange', alpha=0.8, va='bottom')
     ax_top2.text(0.82, 10, '10×', fontsize=9, color='red', alpha=0.8, va='bottom')
-    
+
     ax_top.set_title('Performance Degradation and Uncertainty Growth',
                     fontsize=14, fontweight='bold', pad=15)
     ax_top.grid(True, alpha=0.3, linestyle='--')
-    
-    # Combined legend
-    lines = line1 + line2
-    labels = [l.get_label() for l in lines]
-    ax_top.legend(lines, labels, loc='upper left', fontsize=11, frameon=True, shadow=True)
+
+    # Combined legend with 95% CI
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor=color_perf, alpha=0.25, label='95% CI'),
+        plt.Line2D([0], [0], color=color_perf, marker='o', linewidth=3, markersize=8, label='Mean R²'),
+        plt.Line2D([0], [0], color=color_unc, marker='s', linewidth=3, markersize=8, label='Uncertainty Multiplier')
+    ]
+    ax_top.legend(handles=legend_elements, loc='upper left', fontsize=10, frameon=True, shadow=True)
     ax_top.set_xlim([-0.05, 0.85])
     
     # ===== BOTTOM LEFT: Performance with Multiple CIs =====
@@ -439,9 +448,20 @@ def plot_data_scarcity_analysis(results_file='output/data/data_scarcity_results.
     ax_bl.set_title('Performance with 95% Confidence Intervals', fontsize=13, fontweight='bold')
     ax_bl.set_xticks([0, 1, 2, 3])
     ax_bl.set_xticklabels(['0.30', '0.40', '0.50', '0.60'])
-    ax_bl.legend(fontsize=9, ncol=2)
     ax_bl.grid(True, alpha=0.3, axis='y', linestyle='--')
     ax_bl.set_ylim([0.55, 0.85])
+
+    # Add 95% CI label to legend
+    from matplotlib.patches import Patch
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Patch(facecolor='gray', alpha=0.5, label='Data 1.0'),
+        Patch(facecolor='gray', alpha=0.65, label='Data 0.7'),
+        Patch(facecolor='gray', alpha=0.8, label='Data 0.5'),
+        Patch(facecolor='gray', alpha=0.95, label='Data 0.3'),
+        Line2D([0], [0], color='black', linewidth=2, label='95% CI')
+    ]
+    ax_bl.legend(handles=legend_elements, fontsize=9, ncol=3, loc='lower left')
     
     # ===== BOTTOM RIGHT: Heatmap =====
     ax_br = fig.add_subplot(gs[1, 1])

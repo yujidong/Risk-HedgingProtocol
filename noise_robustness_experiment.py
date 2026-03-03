@@ -67,7 +67,7 @@ def load_base_data(data_path='input/pems-dataset/data/PEMS08/PEMS08.npz'):
     
     print(f"Loading base data from: {data_path}")
     data = np.load(data_path)
-    traffic_data = data['data']  # Shape: (num_samples, num_nodes, num_features)
+    traffic_data = data['data'].astype(np.float32)  # CRITICAL: Convert to float32 to save memory
     
     # Convert to DataFrame for hour-based aggregation
     data_dict = []
@@ -95,7 +95,7 @@ def load_base_data(data_path='input/pems-dataset/data/PEMS08/PEMS08.npz'):
         one_hot_hour = one_hot_hour.add_prefix('hour_')
         
         hour_grouped = pd.concat([grouped[["occupy", "flow", "speed"]], one_hot_hour], axis=1)
-        hour_grouped = np.array(hour_grouped)
+        hour_grouped = np.array(hour_grouped, dtype=np.float32)  # Ensure float32
         
         X, Y = [], []
         for i in range(len(hour_grouped) - WINDOW_SIZE):
@@ -333,10 +333,54 @@ def train_single_model(train_X, train_Y, test_X, test_Y, scaler_Y,
     return r2, rmse
 
 
+def train_multiple_models_sequential(config, base_train_X, base_train_Y, base_test_X, base_test_Y,
+                                    n_repeats, epochs, session_timestamp):
+    """
+    Train multiple models sequentially (one model at a time to save memory).
+
+    Args:
+        config: Noise configuration dict
+        base_train_X, base_train_Y, base_test_X, base_test_Y: Base data
+        n_repeats: Number of models to train
+        epochs: Training epochs
+        session_timestamp: For seed generation
+    """
+    all_results = []
+    import hashlib
+    import gc
+
+    for i in range(n_repeats):
+        # Generate data on-the-fly for this model only
+        session_seed = int(hashlib.md5(session_timestamp.encode()).hexdigest()[:8], 16) % 1000000
+        set_seed(session_seed + i)
+
+        print(f"  Training model {i+1}/{n_repeats}...", end='', flush=True)
+
+        train_X, train_Y, test_X, test_Y, scaler_X, scaler_Y = prepare_dataset(
+            config, base_train_X, base_train_Y, base_test_X, base_test_Y
+        )
+
+        # Train this model
+        r2, rmse = train_single_model(train_X, train_Y, test_X, test_Y, scaler_Y, epochs=epochs)
+        all_results.append({'r2': r2, 'rmse': rmse})
+
+        print(f" R2={r2:.4f}, RMSE={rmse:.4f}")
+
+        # Explicitly delete to free memory
+        del train_X, train_Y, test_X, test_Y, scaler_X, scaler_Y
+
+        # Force garbage collection and clear GPU cache
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+    return all_results
+
+
 def train_multiple_models_parallel(data_configs, n_repeats, epochs, batch_train_size=12):
     """
     Train multiple models in parallel (interleaved batch processing).
-    
+
     Args:
         data_configs: List of data configuration tuples
         n_repeats: Number of models to train
@@ -344,18 +388,18 @@ def train_multiple_models_parallel(data_configs, n_repeats, epochs, batch_train_
         batch_train_size: Number of models to train in parallel
     """
     all_results = []
-    
+
     for batch_start in range(0, n_repeats, batch_train_size):
         batch_end = min(batch_start + batch_train_size, n_repeats)
         batch_size = batch_end - batch_start
-        
+
         print(f"  Training models {batch_start+1}-{batch_end}/{n_repeats} in parallel...")
-        
+
         # Initialize models for this batch
         models = []
         optimizers = []
         train_loaders = []
-        
+
         for i in range(batch_size):
             train_X, train_Y, test_X, test_Y, scaler_X, scaler_Y = data_configs[batch_start + i]
             
@@ -474,24 +518,13 @@ def run_noise_robustness_experiment(experiment_configs, n_repeats=20, epochs=50,
         
         print(f"\n[{config_idx+1}/{len(experiment_configs)}] Configuration: {config_key}")
         print(f"  Type: {config['type']}, Intensity: {config['intensity']}, Data Ratio: {config['train_data_ratio']}")
-        
-        # Pre-generate all data variations
-        print(f"  Generating {n_repeats} data variations...")
-        data_configs = []
-        for i in range(n_repeats):
-            # Use session timestamp to make different runs produce different results
-            # while keeping same-session results reproducible
-            import hashlib
-            session_seed = int(hashlib.md5(session_timestamp.encode()).hexdigest()[:8], 16) % 1000000
-            set_seed(session_seed + i)
-            train_X, train_Y, test_X, test_Y, scaler_X, scaler_Y = prepare_dataset(
-                config, base_train_X, base_train_Y, base_test_X, base_test_Y
-            )
-            data_configs.append((train_X, train_Y, test_X, test_Y, scaler_X, scaler_Y))
-        
-        # Train models in parallel
+
+        # Train models sequentially (data generated on-the-fly to save memory)
         config_start_time = time.time()
-        model_results = train_multiple_models_parallel(data_configs, n_repeats, epochs, batch_train_size)
+        model_results = train_multiple_models_sequential(
+            config, base_train_X, base_train_Y, base_test_X, base_test_Y,
+            n_repeats, epochs, session_timestamp
+        )
         config_time = time.time() - config_start_time
         
         # Aggregate results
@@ -514,8 +547,8 @@ def run_noise_robustness_experiment(experiment_configs, n_repeats=20, epochs=50,
             'training_time_seconds': float(config_time)
         }
         
-        print(f"  Results: R²={np.mean(r2_scores):.4f}±{np.std(r2_scores):.4f}, "
-              f"RMSE={np.mean(rmse_scores):.4f}±{np.std(rmse_scores):.4f}")
+        print(f"  Results: R2={np.mean(r2_scores):.4f}+/-{np.std(r2_scores):.4f}, "
+              f"RMSE={np.mean(rmse_scores):.4f}+/-{np.std(rmse_scores):.4f}")
         print(f"  Time: {config_time:.1f}s")
     
     total_time = time.time() - total_start_time
@@ -592,7 +625,7 @@ if __name__ == '__main__':
         random_drop_configs = get_random_drop_configs()
         run_noise_robustness_experiment(
             random_drop_configs,
-            n_repeats=20,
+            n_repeats=100,
             epochs=50,
             batch_train_size=12,
             output_file='random_drop_results.json',
@@ -606,7 +639,7 @@ if __name__ == '__main__':
         data_scarcity_configs = get_data_scarcity_configs()
         run_noise_robustness_experiment(
             data_scarcity_configs,
-            n_repeats=20,
+            n_repeats=100,
             epochs=50,
             batch_train_size=12,
             output_file='data_scarcity_results.json',
